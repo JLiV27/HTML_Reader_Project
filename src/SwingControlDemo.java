@@ -11,7 +11,6 @@ import java.net.URLConnection;
 
 public class SwingControlDemo implements ActionListener {
     private JFrame mainFrame;
-    private JLabel statusLabel;
     private JPanel controlPanel;
     private JMenuBar mb;
     private JMenu file, edit, help;
@@ -24,6 +23,7 @@ public class SwingControlDemo implements ActionListener {
     JButton startButton = new JButton("Start");
 
     public String readOutput;
+    public String[] manyTerms;
 
     public SwingControlDemo() {
         prepareGUI();
@@ -68,7 +68,7 @@ public class SwingControlDemo implements ActionListener {
             }
         });
 
-            mainFrame.setVisible(true);
+        mainFrame.setVisible(true);
     }
 
     private void showEventDemo() {
@@ -95,7 +95,7 @@ public class SwingControlDemo implements ActionListener {
     }
 
     //private void jButtonActionPerformed(java.awt.event.ActionEvent evt){
-        //JOptionPane.showMessageDialog(JRootPane, taSearch.getText());
+    //JOptionPane.showMessageDialog(JRootPane, taSearch.getText());
     //}
 
     private class ButtonClickListener implements ActionListener {
@@ -109,9 +109,6 @@ public class SwingControlDemo implements ActionListener {
 
                 controlPanel = new JPanel();
                 controlPanel.setLayout(new GridLayout(1,3)); //set the layout of the pannel
-
-                //statusLabel = new JLabel("Waiting for input...", JLabel.CENTER);
-                //statusLabel.setSize(350, 100);
 
                 taOutput = new JTextArea("Waiting for input...");
                 taOutput.setBounds(50, 5, WIDTH - 100, HEIGHT - 50);
@@ -129,7 +126,7 @@ public class SwingControlDemo implements ActionListener {
                 readButton.setActionCommand("Read");
                 readButton.addActionListener(new ButtonClickListener());
 
-                taSearch = new JTextArea("");
+                taSearch = new JTextArea("Input search terms separated\nby commas with no spaces");
                 taSearch.setBounds(50,5,WIDTH-100,HEIGHT-100);
 
                 mainFrame.add(mb);  //add menu bar
@@ -139,9 +136,14 @@ public class SwingControlDemo implements ActionListener {
                 mainFrame.setJMenuBar(mb); //set menu bar
                 mainFrame.setVisible(true);
             }
-            else if(command.equals("Read")){
+            else if(command.equals("Read")) {
 
-                String searchTerm = taSearch.getText();
+                //String searchTerm = taSearch.getText();
+
+                if (taSearch.getText().contains(",")) {
+                    manyTerms = taSearch.getText().split(",");
+                }
+
                 String linkTerm = taLink.getText();
 
                 URL url = null;
@@ -174,47 +176,49 @@ public class SwingControlDemo implements ActionListener {
                     } catch (IOException ex) {
                         throw new RuntimeException(ex);
                     }
-                    if(line.contains(searchTerm)){
-                        if(line.contains("src=\"")){
-                            String[] doubleSourceLinks = line.split("src=\"");
-                            for (int i = 0; i < doubleSourceLinks.length; i++) {
+                    for (int x = 0; x < manyTerms.length; x++) {
+                        if (line.contains(manyTerms[x])) {
+                            if (line.contains(" src=\"")) {
+                                String[] doubleSourceLinks = line.split("src=\"");
+                                for (int i = 1; i < doubleSourceLinks.length; i++) {
                                     System.out.println(line);
-                                    doubleSourceLinks[i] = doubleSourceLinks[i].substring(0,doubleSourceLinks[i].indexOf("\""));
-                                    System.out.println(doubleSourceLinks[i] + " SRC DOUBLE");
-                                readOutput += doubleSourceLinks[i] + "\n";
+                                    doubleSourceLinks[i] = doubleSourceLinks[i].substring(0, doubleSourceLinks[i].indexOf("\""));
+                                    System.out.println(doubleSourceLinks[i]);
+                                    readOutput += doubleSourceLinks[i] + "\n";
+                                }
                             }
-                        }
 
-                        if(line.contains("src='")){
-                            String[] singleSourceLinks = line.split("src='");
-                            for (int i = 0; i < singleSourceLinks.length; i++) {
-                                System.out.println(line);
-                                singleSourceLinks[i] = singleSourceLinks[i].substring(0,singleSourceLinks[i].indexOf("'"));
-                                System.out.println(singleSourceLinks[i] + " SRC SINGLE");
-                                readOutput += singleSourceLinks[i] + "\n";
-                            }
-                        }
-
-                        if(line.contains("href=\"")){
-                            String[] doubleReferenceLinks = line.split("href=\"");
-                            for (int i = 0; i < doubleReferenceLinks.length; i++) {
+                            if (line.contains(" src='")) {
+                                String[] singleSourceLinks = line.split("src='");
+                                for (int i = 1; i < singleSourceLinks.length; i++) {
                                     System.out.println(line);
-                                    doubleReferenceLinks[i] = doubleReferenceLinks[i].substring(0,doubleReferenceLinks[i].indexOf("\""));
-                                    System.out.println(doubleReferenceLinks[i] + " HREF DOUBLE");
+                                    singleSourceLinks[i] = singleSourceLinks[i].substring(0, singleSourceLinks[i].indexOf("'"));
+                                    System.out.println(singleSourceLinks[i]);
+                                    readOutput += singleSourceLinks[i] + "\n";
+                                }
+                            }
+
+                            if (line.contains(" href=\"")) {
+                                String[] doubleReferenceLinks = line.split("href=\"");
+                                for (int i = 1; i < doubleReferenceLinks.length; i++) {
+                                    System.out.println(line);
+                                    doubleReferenceLinks[i] = doubleReferenceLinks[i].substring(0, doubleReferenceLinks[i].indexOf("\""));
+                                    System.out.println(doubleReferenceLinks[i]);
                                     readOutput += doubleReferenceLinks[i] + "\n";
+                                }
                             }
-                        }
 
-                        if(line.contains("href='")){
-                            String[] singleReferenceLinks = line.split("href='");
-                            for (int i = 0; i < singleReferenceLinks.length; i++) {
+                            if (line.contains(" href='")) {
+                                String[] singleReferenceLinks = line.split("href='");
+                                for (int i = 1; i < singleReferenceLinks.length; i++) {
                                     System.out.println(line);
-                                    singleReferenceLinks[i] = singleReferenceLinks[i].substring(0,singleReferenceLinks[i].indexOf("'"));
-                                    System.out.println(singleReferenceLinks[i] + " HREF SINGLE");
+                                    singleReferenceLinks[i] = singleReferenceLinks[i].substring(0, singleReferenceLinks[i].indexOf("'"));
+                                    System.out.println(singleReferenceLinks[i]);
                                     readOutput += singleReferenceLinks[i] + "\n";
+                                }
                             }
+                            taOutput.setText(readOutput);
                         }
-                        taOutput.setText(readOutput);
                     }
                 }
                 try {
@@ -223,8 +227,8 @@ public class SwingControlDemo implements ActionListener {
                     throw new RuntimeException(ex);
                 }
                 try{
-            } catch(Exception ex) {
-                System.out.println(ex);
+                } catch(Exception ex) {
+                    System.out.println(ex);
                 }
             }
         }
